@@ -8,9 +8,13 @@
   <style>
     :root { --bg: #0f172a; --card: #1e293b; --primary: #f97316; --text: #f8fafc; --muted: #94a3b8; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-    body { background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 20px 15px 120px; }
+    body { background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 20px 15px 120px; transition: direction 0.3s; }
     
-    .header { text-align: center; margin-bottom: 20px; }
+    /* Language Switcher */
+    .lang-switcher { position: absolute; top: 15px; right: 15px; background: var(--card); border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 8px; font-size: 13px; font-weight: 600; outline: none; cursor: pointer; }
+    html[dir="rtl"] .lang-switcher { right: auto; left: 15px; }
+
+    .header { text-align: center; margin-bottom: 20px; margin-top: 20px; }
     .badge { background: rgba(249,115,22,0.2); color: var(--primary); padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; border: 1px solid var(--primary); display: inline-block; margin-bottom: 10px; }
     .title { font-size: 24px; font-weight: 800; margin-bottom: 5px; }
     .subtitle { font-size: 13px; color: var(--muted); max-width: 350px; }
@@ -22,11 +26,17 @@
     
     .chat-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #0f172a; }
     .msg { padding: 12px 15px; border-radius: 15px; font-size: 13.5px; line-height: 1.4; max-width: 85%; opacity: 0; transform: translateY(10px); animation: popIn 0.3s forwards; }
-    .msg.bot { background: #1e293b; color: #fff; align-self: flex-start; border-bottom-left-radius: 4px; }
-    .msg.user { background: var(--primary); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; font-weight: 600; }
+    
+    /* LTR / RTL Chat adjustments */
+    .msg.bot { background: #1e293b; color: #fff; align-self: flex-start; border-bottom-left-radius: 4px; border-bottom-right-radius: 15px; }
+    .msg.user { background: var(--primary); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; border-bottom-left-radius: 15px; font-weight: 600; }
+    
+    html[dir="rtl"] .msg.bot { align-self: flex-start; border-bottom-right-radius: 4px; border-bottom-left-radius: 15px; }
+    html[dir="rtl"] .msg.user { align-self: flex-end; border-bottom-left-radius: 4px; border-bottom-right-radius: 15px; }
 
     /* Typing Animation */
     .typing { display: none; align-self: flex-start; background: #1e293b; padding: 12px 15px; border-radius: 15px; border-bottom-left-radius: 4px; gap: 4px; }
+    html[dir="rtl"] .typing { border-bottom-right-radius: 4px; border-bottom-left-radius: 15px; }
     .dot { width: 6px; height: 6px; background: #94a3b8; border-radius: 50%; animation: bounce 1.4s infinite; }
     .dot:nth-child(2) { animation-delay: 0.2s; }
     .dot:nth-child(3) { animation-delay: 0.4s; }
@@ -41,6 +51,7 @@
     .modal-title { font-size: 20px; font-weight: 800; margin-bottom: 10px; color: #fff; }
     .price { font-size: 32px; font-weight: 900; color: var(--primary); margin: 15px 0; }
     .features { text-align: left; color: #cbd5e1; font-size: 13px; line-height: 1.8; margin-bottom: 20px; padding-left: 20px; }
+    html[dir="rtl"] .features { text-align: right; padding-left: 0; padding-right: 20px; }
     
     @keyframes popIn { to { opacity: 1; transform: translateY(0); } }
     @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
@@ -48,10 +59,17 @@
 </head>
 <body>
 
+  <select class="lang-switcher" id="langSelect" onchange="changeLanguage(this.value)">
+    <option value="en">🇺🇸 English</option>
+    <option value="fr">🇫🇷 Français</option>
+    <option value="es">🇪🇸 Español</option>
+    <option value="ar">🇲🇦 الدارجة</option>
+  </select>
+
   <div class="header">
-    <div class="badge">🤖 Live AI Demo</div>
+    <div class="badge" id="t-badge">🤖 Live AI Demo</div>
     <h1 class="title" id="shopName">Your Restaurant</h1>
-    <p class="subtitle">Watch how your customized AI handles orders and customer questions 24/7 automatically.</p>
+    <p class="subtitle" id="t-sub">Watch how your customized AI handles orders and customer questions 24/7 automatically.</p>
   </div>
 
   <div class="phone">
@@ -66,58 +84,171 @@
   </div>
 
   <div class="bottom-bar">
-    <button class="btn" onclick="document.getElementById('salesModal').style.display='flex'">🚀 Unlock AI For Your Restaurant</button>
+    <button class="btn" id="t-btn" onclick="document.getElementById('salesModal').style.display='flex'">🚀 Unlock AI For Your Restaurant</button>
   </div>
 
   <!-- Pricing Modal -->
   <div id="salesModal">
     <div class="modal-card">
-      <div class="modal-title">Activate Your AI Assistant</div>
-      <p style="font-size:13px; color:var(--muted);">I will train this AI exclusively on your menu, prices, and business hours.</p>
-      <div class="price">$49 <span style="font-size:14px; color:var(--muted);">/ One-time</span></div>
+      <div class="modal-title" id="t-m-title">Activate Your AI Assistant</div>
+      <p style="font-size:13px; color:var(--muted);" id="t-m-desc">I will train this AI exclusively on your menu, prices, and business hours.</p>
+      <div class="price">$49 <span style="font-size:14px; color:var(--muted);" id="t-m-price">/ One-time</span></div>
       <ul class="features">
-        <li>Zero monthly subscription fees</li>
-        <li>Custom trained on your exact menu</li>
-        <li>Automated order routing to your WhatsApp</li>
+        <li id="t-f1">Zero monthly subscription fees</li>
+        <li id="t-f2">Custom trained on your exact menu</li>
+        <li id="t-f3">Automated order routing to your WhatsApp</li>
       </ul>
-      <button class="btn" onclick="alert('Please reply to my message on Instagram/Email to activate your license!')">Get Started Now</button>
-      <button class="btn" style="background:transparent; border:1px solid #334155; margin-top:10px; box-shadow:none;" onclick="document.getElementById('salesModal').style.display='none'">Close</button>
+      <button class="btn" id="t-m-btn1" onclick="alert('Please reply to my message on Instagram/Email to activate your license!')">Get Started Now</button>
+      <button class="btn" id="t-m-btn2" style="background:transparent; border:1px solid #334155; margin-top:10px; box-shadow:none;" onclick="document.getElementById('salesModal').style.display='none'">Close</button>
     </div>
   </div>
 
   <script>
-    // 1. Get Restaurant Name from Link
     const urlParams = new URLSearchParams(window.location.search);
     const rawName = urlParams.get('name') || "The Restaurant";
-    const cleanName = rawName.replace(/[<>]/g, ""); // Basic protection
+    const cleanName = rawName.replace(/[<>]/g, "");
     
     document.getElementById('shopName').textContent = cleanName;
     document.getElementById('botName').textContent = cleanName + " AI";
 
-    // 2. Chat Simulation
-    const chatBox = document.getElementById('chatBox');
-    const typing = document.getElementById('typing');
-    
-    const conversation = [
-      { t: 'bot', msg: `Hi! Welcome to ${cleanName}. Would you like to see our menu or place an order?`, delay: 800 },
-      { t: 'user', msg: "I want to place an order for pickup. Do you have any spicy burgers?", delay: 2000 },
-      { t: 'bot', msg: "Yes! Our Volcano Jalapeño Burger is very popular. It comes with fries for $14.99. Shall I add it to your cart?", delay: 2000 },
-      { t: 'user', msg: "Yes, add 2 of those please.", delay: 2000 },
-      { t: 'bot', msg: "Done! 2x Volcano Burgers added. Your total is $29.98. Your order will be ready for pickup in 20 minutes. Thanks!", delay: 2000 }
-    ];
+    // --- Translations Dictionary ---
+    const i18n = {
+      en: {
+        badge: "🤖 Live AI Demo",
+        sub: "Watch how your customized AI handles orders and customer questions 24/7 automatically.",
+        btn: "🚀 Unlock AI For Your Restaurant",
+        mTitle: "Activate Your AI Assistant",
+        mDesc: "I will train this AI exclusively on your menu, prices, and business hours.",
+        mPrice: "/ One-time",
+        f1: "Zero monthly subscription fees",
+        f2: "Custom trained on your exact menu",
+        f3: "Automated order routing to your WhatsApp",
+        mBtn1: "Get Started Now",
+        mBtn2: "Close",
+        chat: [
+          { t: 'bot', msg: `Hi! Welcome to ${cleanName}. Would you like to see our menu or place an order?`, delay: 800 },
+          { t: 'user', msg: "I want to place an order for pickup. Do you have any spicy burgers?", delay: 2000 },
+          { t: 'bot', msg: "Yes! Our Volcano Jalapeño Burger is very popular. It comes with fries for $14.99. Shall I add it to your cart?", delay: 2000 },
+          { t: 'user', msg: "Yes, add 2 of those please.", delay: 2000 },
+          { t: 'bot', msg: "Done! 2x Volcano Burgers added. Your total is $29.98. Your order will be ready for pickup in 20 minutes. Thanks!", delay: 2000 }
+        ]
+      },
+      fr: {
+        badge: "🤖 Démo IA en Direct",
+        sub: "Regardez comment votre IA personnalisée gère les commandes et les questions des clients 24/7.",
+        btn: "🚀 Débloquez l'IA pour votre Restaurant",
+        mTitle: "Activez votre Assistant IA",
+        mDesc: "Je formerai cette IA exclusivement sur votre menu, vos prix et vos horaires.",
+        mPrice: "/ Paiement unique",
+        f1: "Zéro abonnement mensuel",
+        f2: "Formé sur mesure sur votre menu",
+        f3: "Envoi automatique des commandes sur votre WhatsApp",
+        mBtn1: "Commencer Maintenant",
+        mBtn2: "Fermer",
+        chat: [
+          { t: 'bot', msg: `Bonjour ! Bienvenue chez ${cleanName}. Souhaitez-vous voir notre menu ou passer une commande ?`, delay: 800 },
+          { t: 'user', msg: "Je voudrais commander à emporter. Avez-vous des burgers épicés ?", delay: 2000 },
+          { t: 'bot', msg: "Oui ! Notre Volcano Jalapeño Burger est très populaire. Il est servi avec des frites pour 14,99 $. Dois-je l'ajouter ?", delay: 2000 },
+          { t: 'user', msg: "Oui, mettez-en 2 s'il vous plaît.", delay: 2000 },
+          { t: 'bot', msg: "C'est noté ! 2x Burgers Volcano ajoutés. Le total est de 29,98 $. Votre commande sera prête dans 20 minutes. Merci !", delay: 2000 }
+        ]
+      },
+      es: {
+        badge: "🤖 Demo de IA en Vivo",
+        sub: "Mira cómo tu IA personalizada maneja pedidos y preguntas 24/7 automáticamente.",
+        btn: "🚀 Desbloquea la IA para tu Restaurante",
+        mTitle: "Activa tu Asistente de IA",
+        mDesc: "Entrenaré esta IA exclusivamente con tu menú, precios y horarios.",
+        mPrice: "/ Pago único",
+        f1: "Cero cuotas mensuales",
+        f2: "Entrenado a medida con tu menú exacto",
+        f3: "Enrutamiento automático de pedidos a tu WhatsApp",
+        mBtn1: "Empezar Ahora",
+        mBtn2: "Cerrar",
+        chat: [
+          { t: 'bot', msg: `¡Hola! Bienvenido a ${cleanName}. ¿Te gustaría ver nuestro menú o hacer un pedido?`, delay: 800 },
+          { t: 'user', msg: "Quiero hacer un pedido para llevar. ¿Tienen hamburguesas picantes?", delay: 2000 },
+          { t: 'bot', msg: "¡Sí! Nuestra Volcano Jalapeño Burger es muy popular. Viene con papas fritas por $14.99. ¿La añado a tu carrito?", delay: 2000 },
+          { t: 'user', msg: "Sí, añade 2 por favor.", delay: 2000 },
+          { t: 'bot', msg: "¡Listo! 2x Volcano Burgers añadidas. Tu total es $29.98. Tu pedido estará listo en 20 minutos. ¡Gracias!", delay: 2000 }
+        ]
+      },
+      ar: {
+        badge: "🤖 ديمو الذكاء الاصطناعي",
+        sub: "شوف كيفاش المساعد الذكي ديالك كيتعامل مع الطلبات والأسئلة ديال الكليان 24/7 أوتوماتيكياً.",
+        btn: "🚀 فعل الذكاء الاصطناعي لمطعمك",
+        mTitle: "تفعيل المساعد الذكي",
+        mDesc: "غادي ندرب هاد الروبوت حصرياً على المينو، الأثمنة، وأوقات العمل ديال مطعمك.",
+        mPrice: "/ دفعة واحدة",
+        f1: "بدون أي اشتراكات شهرية",
+        f2: "مدرب خصيصاً على المينو ديالك",
+        f3: "تحويل الطلبات نيشان للواتساب ديالك",
+        mBtn1: "بدأ دابا",
+        mBtn2: "سد",
+        chat: [
+          { t: 'bot', msg: `مرحباً بك في ${cleanName}. واش بغيتي تشوف المينو ولا دير شي طلب؟`, delay: 800 },
+          { t: 'user', msg: "بغيت ندير طلب نمشي بيه. واش عندكم شي برجر حار؟", delay: 2000 },
+          { t: 'bot', msg: "أيه! برجر فولكانو ديالنا مطلوب بزاف. كيجي مع الفريت بـ 14.99$. نزيدو فطلبك؟", delay: 2000 },
+          { t: 'user', msg: "واخا، زيد ليا جوج منو عافاك.", delay: 2000 },
+          { t: 'bot', msg: "تم! ضفنا 2x برجر فولكانو. المجموع هو 29.98$. الطلب ديالك غيكون واجد من دابا 20 دقيقة. شكراً!", delay: 2000 }
+        ]
+      }
+    };
 
+    let chatTimeout;
     let step = 0;
-    function nextMsg() {
-      if (step >= conversation.length) return;
+    let currentLang = urlParams.get('lang') || 'en';
+    
+    // Set initial select value
+    if(i18n[currentLang]) { document.getElementById('langSelect').value = currentLang; }
+
+    function changeLanguage(lang) {
+      if (!i18n[lang]) lang = 'en';
+      currentLang = lang;
       
-      const current = conversation[step];
+      // Handle RTL for Arabic
+      document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+
+      // Update UI Text
+      document.getElementById('t-badge').textContent = i18n[lang].badge;
+      document.getElementById('t-sub').textContent = i18n[lang].sub;
+      document.getElementById('t-btn').textContent = i18n[lang].btn;
+      document.getElementById('t-m-title').textContent = i18n[lang].mTitle;
+      document.getElementById('t-m-desc').textContent = i18n[lang].mDesc;
+      document.getElementById('t-m-price').textContent = i18n[lang].mPrice;
+      document.getElementById('t-f1').textContent = i18n[lang].f1;
+      document.getElementById('t-f2').textContent = i18n[lang].f2;
+      document.getElementById('t-f3').textContent = i18n[lang].f3;
+      document.getElementById('t-m-btn1').textContent = i18n[lang].mBtn1;
+      document.getElementById('t-m-btn2').textContent = i18n[lang].mBtn2;
+
+      // Restart Chat
+      clearTimeout(chatTimeout);
+      document.querySelectorAll('.msg').forEach(el => el.remove());
+      step = 0;
+      nextMsg(lang);
+    }
+
+    function nextMsg(lang) {
+      const chat = i18n[lang].chat;
+      if (step >= chat.length) {
+        document.getElementById('typing').style.display = 'none';
+        return;
+      }
+      
+      const current = chat[step];
+      const typing = document.getElementById('typing');
+      const chatBox = document.getElementById('chatBox');
+
       if (current.t === 'bot') {
         typing.style.display = 'flex';
         chatBox.appendChild(typing);
         chatBox.scrollTop = chatBox.scrollHeight;
+      } else {
+        typing.style.display = 'none';
       }
 
-      setTimeout(() => {
+      chatTimeout = setTimeout(() => {
         if (current.t === 'bot') typing.style.display = 'none';
         
         const div = document.createElement('div');
@@ -127,11 +258,12 @@
         chatBox.scrollTop = chatBox.scrollHeight;
         
         step++;
-        nextMsg();
+        nextMsg(lang);
       }, current.delay);
     }
 
-    setTimeout(nextMsg, 500);
+    // Init language on load
+    changeLanguage(currentLang);
   </script>
 </body>
 </html>
