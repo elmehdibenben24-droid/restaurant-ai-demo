@@ -8,7 +8,8 @@
   <style>
     :root { --bg: #0f172a; --card: #1e293b; --primary: #f97316; --text: #f8fafc; --muted: #94a3b8; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-    body { background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 20px 15px 120px; transition: direction 0.3s; }
+    /* تم مسح المساحة السفلية الزائدة التي كانت مخصصة للزر */
+    body { background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 20px 15px 40px; transition: direction 0.3s; }
     
     /* Language Switcher */
     .lang-switcher { position: absolute; top: 15px; right: 15px; background: var(--card); border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 8px; font-size: 13px; font-weight: 600; outline: none; cursor: pointer; }
@@ -41,9 +42,8 @@
     .dot:nth-child(2) { animation-delay: 0.2s; }
     .dot:nth-child(3) { animation-delay: 0.4s; }
 
-    /* Bottom Action */
-    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15,23,42,0.95); backdrop-filter: blur(10px); padding: 15px; border-top: 1px solid #334155; text-align: center; z-index: 100; }
-    .btn { background: var(--primary); color: #fff; border: none; padding: 15px; border-radius: 10px; font-size: 15px; font-weight: 800; width: 100%; max-width: 360px; cursor: pointer; box-shadow: 0 4px 15px rgba(249,115,22,0.3); }
+    /* Sales Modal Buttons */
+    .btn { background: var(--primary); color: #fff; border: none; padding: 15px; border-radius: 10px; font-size: 15px; font-weight: 800; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(249,115,22,0.3); }
 
     /* Sales Modal */
     #salesModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
@@ -83,10 +83,6 @@
     </div>
   </div>
 
-  <div class="bottom-bar">
-    <button class="btn" id="t-btn" onclick="document.getElementById('salesModal').style.display='flex'">🚀 Unlock AI For Your Restaurant</button>
-  </div>
-
   <!-- Pricing Modal -->
   <div id="salesModal">
     <div class="modal-card">
@@ -111,12 +107,10 @@
     document.getElementById('shopName').textContent = cleanName;
     document.getElementById('botName').textContent = cleanName + " AI";
 
-    // --- Translations Dictionary ---
     const i18n = {
       en: {
         badge: "🤖 Live AI Demo",
         sub: "Watch how your customized AI handles orders and customer questions 24/7 automatically.",
-        btn: "🚀 Unlock AI For Your Restaurant",
         mTitle: "Activate Your AI Assistant",
         mDesc: "I will train this AI exclusively on your menu, prices, and business hours.",
         mPrice: "/ One-time",
@@ -136,7 +130,6 @@
       fr: {
         badge: "🤖 Démo IA en Direct",
         sub: "Regardez comment votre IA personnalisée gère les commandes et les questions des clients 24/7.",
-        btn: "🚀 Débloquez l'IA pour votre Restaurant",
         mTitle: "Activez votre Assistant IA",
         mDesc: "Je formerai cette IA exclusivement sur votre menu, vos prix et vos horaires.",
         mPrice: "/ Paiement unique",
@@ -156,7 +149,6 @@
       es: {
         badge: "🤖 Demo de IA en Vivo",
         sub: "Mira cómo tu IA personalizada maneja pedidos y preguntas 24/7 automáticamente.",
-        btn: "🚀 Desbloquea la IA para tu Restaurante",
         mTitle: "Activa tu Asistente de IA",
         mDesc: "Entrenaré esta IA exclusivamente con tu menú, precios y horarios.",
         mPrice: "/ Pago único",
@@ -176,7 +168,6 @@
       ar: {
         badge: "🤖 ديمو الذكاء الاصطناعي",
         sub: "شوف كيفاش المساعد الذكي ديالك كيتعامل مع الطلبات والأسئلة ديال الكليان 24/7 أوتوماتيكياً.",
-        btn: "🚀 فعل الذكاء الاصطناعي لمطعمك",
         mTitle: "تفعيل المساعد الذكي",
         mDesc: "غادي ندرب هاد الروبوت حصرياً على المينو، الأثمنة، وأوقات العمل ديال مطعمك.",
         mPrice: "/ دفعة واحدة",
@@ -199,20 +190,16 @@
     let step = 0;
     let currentLang = urlParams.get('lang') || 'en';
     
-    // Set initial select value
     if(i18n[currentLang]) { document.getElementById('langSelect').value = currentLang; }
 
     function changeLanguage(lang) {
       if (!i18n[lang]) lang = 'en';
       currentLang = lang;
       
-      // Handle RTL for Arabic
       document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
 
-      // Update UI Text
       document.getElementById('t-badge').textContent = i18n[lang].badge;
       document.getElementById('t-sub').textContent = i18n[lang].sub;
-      document.getElementById('t-btn').textContent = i18n[lang].btn;
       document.getElementById('t-m-title').textContent = i18n[lang].mTitle;
       document.getElementById('t-m-desc').textContent = i18n[lang].mDesc;
       document.getElementById('t-m-price').textContent = i18n[lang].mPrice;
@@ -222,7 +209,6 @@
       document.getElementById('t-m-btn1').textContent = i18n[lang].mBtn1;
       document.getElementById('t-m-btn2').textContent = i18n[lang].mBtn2;
 
-      // Restart Chat
       clearTimeout(chatTimeout);
       document.querySelectorAll('.msg').forEach(el => el.remove());
       step = 0;
@@ -262,7 +248,6 @@
       }, current.delay);
     }
 
-    // Init language on load
     changeLanguage(currentLang);
   </script>
 </body>
