@@ -1,178 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>AI Restaurant Assistant Demo</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AI Ordering Assistant - Live Demo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #0f172a;
-      --card: #1e293b;
-      --primary: #f97316; /* Orange food theme */
-      --primary-hover: #ea580c;
-      --text: #f8fafc;
-      --muted: #94a3b8;
-      --bot-msg: #334155;
-      --user-msg: #f97316;
-    }
+    :root { --bg: #0f172a; --card: #1e293b; --primary: #f97316; --text: #f8fafc; --muted: #94a3b8; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-    body { background-color: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 20px 16px 100px; }
-
-    /* Header */
-    .header { text-align: center; margin-bottom: 24px; width: 100%; max-width: 500px; }
-    .badge { display: inline-block; background: rgba(249, 115, 22, 0.15); color: var(--primary); padding: 6px 12px; border-radius: 99px; font-size: 12px; font-weight: 700; margin-bottom: 12px; border: 1px solid rgba(249, 115, 22, 0.3); }
-    .restaurant-name { font-size: 28px; font-weight: 900; margin-bottom: 8px; color: #fff; }
-    .subtitle { font-size: 14px; color: var(--muted); line-height: 1.5; }
-
-    /* Phone Mockup */
-    .phone-mockup { background: #000; border: 8px solid #334155; border-radius: 36px; width: 100%; max-width: 380px; height: 550px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); position: relative; }
-    .phone-header { background: var(--card); padding: 16px; text-align: center; border-bottom: 1px solid #334155; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .online-dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; }
-
-    /* Chat Area */
-    .chat-window { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: #0f172a; }
-    .msg { padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.5; max-width: 85%; opacity: 0; transform: translateY(10px); animation: fadeInUp 0.4s forwards; }
-    .msg.bot { background: var(--bot-msg); color: #fff; align-self: flex-start; border-bottom-left-radius: 4px; }
-    .msg.user { background: var(--user-msg); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; font-weight: 500; }
+    body { background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 20px 15px 120px; }
     
-    /* Typing Indicator */
-    .typing { display: flex; gap: 4px; padding: 12px 16px; background: var(--bot-msg); border-radius: 16px; border-bottom-left-radius: 4px; width: fit-content; align-self: flex-start; display: none; }
-    .dot { width: 6px; height: 6px; background: #cbd5e1; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
-    .dot:nth-child(1) { animation-delay: -0.32s; }
-    .dot:nth-child(2) { animation-delay: -0.16s; }
+    .header { text-align: center; margin-bottom: 20px; }
+    .badge { background: rgba(249,115,22,0.2); color: var(--primary); padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; border: 1px solid var(--primary); display: inline-block; margin-bottom: 10px; }
+    .title { font-size: 24px; font-weight: 800; margin-bottom: 5px; }
+    .subtitle { font-size: 13px; color: var(--muted); max-width: 350px; }
 
-    /* Fixed Bottom CTA */
-    .cta-container { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); padding: 16px; border-top: 1px solid #334155; text-align: center; z-index: 100; }
-    .btn-main { background: var(--primary); color: #fff; border: none; padding: 16px 24px; border-radius: 12px; font-size: 16px; font-weight: 800; width: 100%; max-width: 380px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 14px rgba(249, 115, 22, 0.4); }
-    .btn-main:active { transform: scale(0.98); }
+    /* Phone UI */
+    .phone { background: #000; border: 6px solid #334155; border-radius: 30px; width: 100%; max-width: 360px; height: 500px; display: flex; flex-direction: column; overflow: hidden; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .phone-head { background: var(--card); padding: 15px; text-align: center; border-bottom: 1px solid #334155; font-weight: 800; font-size: 15px; color: #fff; display: flex; justify-content: center; align-items: center; gap: 8px; }
+    .online { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; }
+    
+    .chat-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #0f172a; }
+    .msg { padding: 12px 15px; border-radius: 15px; font-size: 13.5px; line-height: 1.4; max-width: 85%; opacity: 0; transform: translateY(10px); animation: popIn 0.3s forwards; }
+    .msg.bot { background: #1e293b; color: #fff; align-self: flex-start; border-bottom-left-radius: 4px; }
+    .msg.user { background: var(--primary); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; font-weight: 600; }
+
+    /* Typing Animation */
+    .typing { display: none; align-self: flex-start; background: #1e293b; padding: 12px 15px; border-radius: 15px; border-bottom-left-radius: 4px; gap: 4px; }
+    .dot { width: 6px; height: 6px; background: #94a3b8; border-radius: 50%; animation: bounce 1.4s infinite; }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+
+    /* Bottom Action */
+    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15,23,42,0.95); backdrop-filter: blur(10px); padding: 15px; border-top: 1px solid #334155; text-align: center; z-index: 100; }
+    .btn { background: var(--primary); color: #fff; border: none; padding: 15px; border-radius: 10px; font-size: 15px; font-weight: 800; width: 100%; max-width: 360px; cursor: pointer; box-shadow: 0 4px 15px rgba(249,115,22,0.3); }
 
     /* Sales Modal */
-    #salesModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
-    .modal-content { background: var(--card); border-radius: 20px; padding: 30px 20px; width: 100%; max-width: 400px; text-align: center; border: 1px solid #334155; }
-    .modal-title { font-size: 22px; font-weight: 900; margin-bottom: 12px; color: #fff; }
-    .modal-desc { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
-    .price-tag { font-size: 36px; font-weight: 900; color: var(--primary); margin-bottom: 24px; display: block; }
-    .btn-close { background: #334155; color: #fff; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: 700; cursor: pointer; margin-top: 12px; }
-
-    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
-    @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+    #salesModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+    .modal-card { background: var(--card); border-radius: 16px; padding: 25px 20px; width: 100%; max-width: 380px; text-align: center; border: 1px solid var(--primary); }
+    .modal-title { font-size: 20px; font-weight: 800; margin-bottom: 10px; color: #fff; }
+    .price { font-size: 32px; font-weight: 900; color: var(--primary); margin: 15px 0; }
+    .features { text-align: left; color: #cbd5e1; font-size: 13px; line-height: 1.8; margin-bottom: 20px; padding-left: 20px; }
+    
+    @keyframes popIn { to { opacity: 1; transform: translateY(0); } }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
   </style>
 </head>
 <body>
 
   <div class="header">
-    <div class="badge">🤖 AI Order Assistant</div>
-    <h1 class="restaurant-name" id="displayTitle">Your Restaurant</h1>
-    <p class="subtitle">Watch how your customized AI handles customer questions, suggests menu items, and takes orders automatically 24/7.</p>
+    <div class="badge">🤖 Live AI Demo</div>
+    <h1 class="title" id="shopName">Your Restaurant</h1>
+    <p class="subtitle">Watch how your customized AI handles orders and customer questions 24/7 automatically.</p>
   </div>
 
-  <div class="phone-mockup">
-    <div class="phone-header">
-      <div class="online-dot"></div>
-      <span id="botName">OrderBot</span>
+  <div class="phone">
+    <div class="phone-head">
+      <div class="online"></div> <span id="botName">OrderBot</span>
     </div>
-    
-    <div class="chat-window" id="chatWindow">
-      <!-- Chat sequence will be generated here by JS -->
-      <div class="typing" id="typingIndicator">
+    <div class="chat-box" id="chatBox">
+      <div class="typing" id="typing">
         <div class="dot"></div><div class="dot"></div><div class="dot"></div>
       </div>
     </div>
   </div>
 
-  <div class="cta-container">
-    <button class="btn-main" onclick="openModal()">Unlock AI For Your Restaurant</button>
+  <div class="bottom-bar">
+    <button class="btn" onclick="document.getElementById('salesModal').style.display='flex'">🚀 Unlock AI For Your Restaurant</button>
   </div>
 
-  <!-- Sales Pitch Modal -->
+  <!-- Pricing Modal -->
   <div id="salesModal">
-    <div class="modal-content">
-      <div style="font-size: 40px; margin-bottom: 10px;">🚀</div>
-      <h2 class="modal-title">Activate Your AI Assistant</h2>
-      <p class="modal-desc">I will build, train, and deploy this exact AI trained exclusively on <strong>your menu</strong> and business hours.</p>
-      <span class="price-tag">$49 <span style="font-size: 14px; color: #94a3b8; font-weight: 500;">/ One-time setup</span></span>
-      <ul style="text-align: left; color: #cbd5e1; font-size: 13px; margin-bottom: 24px; padding-left: 20px; line-height: 1.8;">
+    <div class="modal-card">
+      <div class="modal-title">Activate Your AI Assistant</div>
+      <p style="font-size:13px; color:var(--muted);">I will train this AI exclusively on your menu, prices, and business hours.</p>
+      <div class="price">$49 <span style="font-size:14px; color:var(--muted);">/ One-time</span></div>
+      <ul class="features">
         <li>Zero monthly subscription fees</li>
-        <li>Trained on your specific menu & prices</li>
-        <li>Connects directly to your WhatsApp</li>
+        <li>Custom trained on your exact menu</li>
+        <li>Automated order routing to your WhatsApp</li>
       </ul>
-      <button class="btn-main" onclick="alert('Contact me via Instagram/Email to secure your setup!')">Get Started Now</button>
-      <button class="btn-close" onclick="closeModal()">Maybe Later</button>
+      <button class="btn" onclick="alert('Please reply to my message on Instagram/Email to activate your license!')">Get Started Now</button>
+      <button class="btn" style="background:transparent; border:1px solid #334155; margin-top:10px; box-shadow:none;" onclick="document.getElementById('salesModal').style.display='none'">Close</button>
     </div>
   </div>
 
   <script>
-    // 1. Get Restaurant Name from URL parameter
-    function sanitize(str) {
-      if (!str) return "";
-      const temp = document.createElement("div");
-      temp.textContent = str;
-      return temp.innerHTML;
-    }
+    // 1. Get Restaurant Name from Link
+    const urlParams = new URLSearchParams(window.location.search);
+    const rawName = urlParams.get('name') || "The Restaurant";
+    const cleanName = rawName.replace(/[<>]/g, ""); // Basic protection
+    
+    document.getElementById('shopName').textContent = cleanName;
+    document.getElementById('botName').textContent = cleanName + " AI";
 
-    const params = new URLSearchParams(window.location.search);
-    const rawName = params.get("name") || "The Restaurant";
-    const shopName = sanitize(rawName);
-
-    document.getElementById("displayTitle").textContent = shopName;
-    document.getElementById("botName").textContent = shopName + " AI";
-    document.title = "AI Demo - " + shopName;
-
-    // 2. Automated Chat Animation Logic
-    const chatWindow = document.getElementById("chatWindow");
-    const typingIndicator = document.getElementById("typingIndicator");
-
-    const chatSequence = [
-      { type: 'bot', text: `Hi there! Welcome to ${shopName}. How can I help you today?`, delay: 500 },
-      { type: 'user', text: "Do you guys have any vegan options?", delay: 2000 },
-      { type: 'bot', text: "Yes! Our most popular vegan dish is the Grilled Veggie Bowl. Would you like to see the full vegan menu?", delay: 1500 },
-      { type: 'user', text: "Just the bowl is fine. How much is it?", delay: 2500 },
-      { type: 'bot', text: "The Grilled Veggie Bowl is $12.50. Shall I add this to your order?", delay: 1500 },
-      { type: 'user', text: "Yes please, for pickup.", delay: 2000 },
-      { type: 'bot', text: "Perfect! Your order is confirmed. It will be ready for pickup in 15 minutes at our counter. See you soon!", delay: 2000 }
+    // 2. Chat Simulation
+    const chatBox = document.getElementById('chatBox');
+    const typing = document.getElementById('typing');
+    
+    const conversation = [
+      { t: 'bot', msg: `Hi! Welcome to ${cleanName}. Would you like to see our menu or place an order?`, delay: 800 },
+      { t: 'user', msg: "I want to place an order for pickup. Do you have any spicy burgers?", delay: 2000 },
+      { t: 'bot', msg: "Yes! Our Volcano Jalapeño Burger is very popular. It comes with fries for $14.99. Shall I add it to your cart?", delay: 2000 },
+      { t: 'user', msg: "Yes, add 2 of those please.", delay: 2000 },
+      { t: 'bot', msg: "Done! 2x Volcano Burgers added. Your total is $29.98. Your order will be ready for pickup in 20 minutes. Thanks!", delay: 2000 }
     ];
 
-    let currentStep = 0;
-
-    function renderNextMessage() {
-      if (currentStep >= chatSequence.length) return;
-
-      const msgData = chatSequence[currentStep];
+    let step = 0;
+    function nextMsg() {
+      if (step >= conversation.length) return;
       
-      if (msgData.type === 'bot') {
-        typingIndicator.style.display = 'flex';
-        chatWindow.appendChild(typingIndicator); // move to bottom
-        chatWindow.scrollTop = chatWindow.scrollHeight;
+      const current = conversation[step];
+      if (current.t === 'bot') {
+        typing.style.display = 'flex';
+        chatBox.appendChild(typing);
+        chatBox.scrollTop = chatBox.scrollHeight;
       }
 
       setTimeout(() => {
-        if (msgData.type === 'bot') {
-          typingIndicator.style.display = 'none';
-        }
-
-        const msgDiv = document.createElement("div");
-        msgDiv.className = `msg ${msgData.type}`;
-        msgDiv.textContent = msgData.text;
+        if (current.t === 'bot') typing.style.display = 'none';
         
-        chatWindow.insertBefore(msgDiv, typingIndicator);
-        chatWindow.scrollTop = chatWindow.scrollHeight;
+        const div = document.createElement('div');
+        div.className = `msg ${current.t}`;
+        div.textContent = current.msg;
+        chatBox.insertBefore(div, typing);
+        chatBox.scrollTop = chatBox.scrollHeight;
         
-        currentStep++;
-        renderNextMessage();
-      }, msgData.delay);
+        step++;
+        nextMsg();
+      }, current.delay);
     }
 
-    // Start chat animation after a short delay
-    setTimeout(renderNextMessage, 500);
-
-    // 3. Modal Logic
-    function openModal() {
-      document.getElementById("salesModal").style.display = "flex";
-    }
-    function closeModal() {
-      document.getElementById("salesModal").style.display = "none";
-    }
+    setTimeout(nextMsg, 500);
   </script>
 </body>
 </html>
